@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QFrame>
 
 // 构造函数：布局标题栏、添加按钮和好友列表，连接信号
 ContactList::ContactList(ContactViewModel *viewModel, QWidget *parent)
@@ -53,35 +54,72 @@ ContactList::ContactList(ContactViewModel *viewModel, QWidget *parent)
     connect(m_listWidget, &QListWidget::itemClicked, this, &ContactList::onFriendItemClicked);
     connect(m_viewModel->friendModel(), &FriendModel::friendListUpdated,
             this, &ContactList::onFriendListUpdated);
+    connect(m_viewModel->friendModel(), &FriendModel::friendOnlineChanged,
+            this, [this](quint64, bool) { onFriendListUpdated(); });
 }
 
-// 刷新好友列表：显示在线状态图标、昵称和备注
+// 刷新好友列表：显示在线状态指示灯 + 头像 + 昵称
 void ContactList::onFriendListUpdated() {
     m_friends = m_viewModel->friendModel()->friendList();
     m_listWidget->clear();
 
     for (const auto &f : m_friends) {
-        // 在线绿点，离线灰点
-        QString dotColor = f.online ? "#07c160" : "#999999";
-        QString display = QString(
-            "<span style='color:%1; font-size:18px;'>&#9679;</span>"
-            "&nbsp;&nbsp;<span style='color:white; font-size:14px;'>%2</span>")
-            .arg(dotColor, f.nickname);
+        // ---- 行容器 ----
+        auto *row = new QFrame;
+        row->setStyleSheet("background: transparent;");
+        auto *rowLayout = new QHBoxLayout(row);
+        rowLayout->setContentsMargins(12, 8, 12, 8);
+        rowLayout->setSpacing(12);
+
+        // 在线状态指示灯（小圆点）
+        auto *dot = new QLabel;
+        int dotSize = 12;
+        dot->setFixedSize(dotSize, dotSize);
+        QString dotBg = f.online ? "#07c160" : "#777777";
+        dot->setStyleSheet(QString(
+            "background: %1; border-radius: %2px; min-width: %2px; min-height: %2px;")
+            .arg(dotBg).arg(dotSize / 2));
+        rowLayout->addWidget(dot);
+
+        // 头像（圆形，首字母）
+        auto *avatar = new QLabel(f.nickname.left(1).toUpper());
+        avatar->setFixedSize(42, 42);
+        avatar->setAlignment(Qt::AlignCenter);
+        avatar->setStyleSheet(QString(
+            "background: %1; border-radius: 21px; color: white;"
+            " font-size: 16px; font-weight: bold;")
+            .arg(f.online ? "#07c160" : "#666666"));
+        rowLayout->addWidget(avatar);
+
+        // 昵称 + 备注
+        auto *textLayout = new QVBoxLayout;
+        textLayout->setSpacing(2);
+
+        auto *nameLabel = new QLabel(f.nickname);
+        nameLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold; background: transparent;");
+        textLayout->addWidget(nameLabel);
 
         if (!f.remark.isEmpty()) {
-            display += QString(
-                "&nbsp;<span style='color:#999; font-size:12px;'>(%1)</span>")
-                .arg(f.remark);
+            auto *remarkLabel = new QLabel(f.remark);
+            remarkLabel->setStyleSheet("color: #999; font-size: 12px; background: transparent;");
+            textLayout->addWidget(remarkLabel);
         }
 
-        auto *item = new QListWidgetItem;
-        auto *label = new QLabel(display);
-        label->setStyleSheet("background: transparent;");
-        m_listWidget->addItem(item);
-        m_listWidget->setItemWidget(item, label);
+        rowLayout->addLayout(textLayout, 1);
 
+        // 在线文字状态
+        auto *statusLabel = new QLabel(f.online ? "在线" : "离线");
+        statusLabel->setStyleSheet(QString(
+            "color: %1; font-size: 12px; background: transparent;")
+            .arg(f.online ? "#07c160" : "#999"));
+        rowLayout->addWidget(statusLabel);
+
+        // ---- 添加到列表 ----
+        auto *item = new QListWidgetItem;
         item->setData(Qt::UserRole, f.user_id);
-        item->setSizeHint(QSize(0, 52));
+        item->setSizeHint(QSize(0, 64));
+        m_listWidget->addItem(item);
+        m_listWidget->setItemWidget(item, row);
     }
 }
 

@@ -261,6 +261,7 @@ void ApiManager::getFriendList() {
                 info.nickname = obj["nickname"].toString();
                 info.avatar_url = obj["avatar_url"].toString();
                 info.remark = obj["remark"].toString();
+                info.online = obj["online"].toBool();
                 list.append(info);
             }
             emit friendListReady(true, list);
