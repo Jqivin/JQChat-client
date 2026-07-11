@@ -1,0 +1,67 @@
+/* ============================================
+   JQChat Global Stylesheet
+   Light theme - blue accent
+   ============================================ */
+
+* {
+    font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif;
+    font-size: 13px;
+}
+
+QMainWindow {
+    background-color: #fafafa;
+}
+
+/* --- ScrollBar --- */
+QScrollBar:vertical {
+    background: transparent;
+    width: 6px;
+    margin: 0;
+}
+QScrollBar::handle:vertical {
+    background: #c0c0c0;
+    border-radius: 3px;
+    min-height: 30px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #a0a0a0;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+QScrollBar:horizontal {
+    background: transparent;
+    height: 6px;
+}
+QScrollBar::handle:horizontal {
+    background: #c0c0c0;
+    border-radius: 3px;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0;
+}
+
+/* --- Tooltips --- */
+QToolTip {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* --- LineEdit base --- */
+QLineEdit {
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    background: #fff;
+    selection-background-color: #1197fa;
+    color: #333;
+}
+QLineEdit:focus {
+    border-color: #1197fa;
+}

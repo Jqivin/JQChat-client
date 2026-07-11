@@ -1,0 +1,65 @@
+# Build outputs
+build/
+*/build/
+out/
+*.obj
+*.o
+*.dll
+*.lib
+*.exp
+*.pdb
+*.ilk
+
+# CMake generated
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# Qt generated
+*_autogen/
+.qmake.stash
+*.pro.user
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+
+# Visual Studio
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.slnx
+*.suo
+*.user
+*.opendb
+
+# Debug / Release
+Debug/
+Release/
+RelWithDebInfo/
+x64/
+Win32/
+
+# Package / Installer
+package/
+*.iss
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Qt Creator
+*.creator
+*.creator.user
+*.files
+*.includes
+*.config

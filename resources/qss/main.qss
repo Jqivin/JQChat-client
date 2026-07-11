@@ -1,0 +1,211 @@
+/* ============================================
+   JQChat Main Interface Stylesheet
+   Light gray sidebar + white chat area + blue accent
+   ============================================ */
+
+/* --- Main content fills frameless window edge-to-edge --- */
+QMainWindow {
+    background: #fafafa;
+    border: none;
+}
+
+/* --- Left Sidebar (light gray) --- */
+#leftPanel {
+    background: #e6e6eb;
+    min-width: 260px;
+    max-width: 320px;
+    border: none;
+}
+
+/* --- Conversation list --- */
+#conversationList {
+    background: #e6e6eb;
+    border: none;
+    outline: none;
+    color: #333;
+}
+#conversationList::item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #dcdce2;
+    color: #333;
+    min-height: 40px;
+}
+#conversationList::item:hover {
+    background: #dcdce2;
+}
+#conversationList::item:selected {
+    background: #1197fa;
+    color: #fff;
+}
+
+/* --- Right panel / chat area --- */
+#rightPanel {
+    background: #fafafa;
+}
+
+/* --- Chat title bar --- */
+#chatTitleBar {
+    background: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px 20px;
+}
+#chatTitleLabel {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* --- Empty page hint --- */
+#emptyHint {
+    color: #bbb;
+    font-size: 16px;
+}
+
+/* --- Message area --- */
+#messageScrollArea {
+    background: #fafafa;
+    border: none;
+}
+#messageContainer {
+    background: #fafafa;
+}
+
+/* --- Chat input area --- */
+#chatInputBar {
+    background: #ffffff;
+    border-top: 1px solid #e0e0e0;
+}
+
+#chatToolBtn {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    min-width: 32px;
+    min-height: 32px;
+}
+#chatToolBtn:hover {
+    background: #e8e8e8;
+}
+
+/* --- Input text edit --- */
+#messageTextEdit {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: #fafafa;
+    font-size: 14px;
+    color: #333;
+}
+#messageTextEdit:focus {
+    border-color: #1197fa;
+    background: #fff;
+}
+
+/* --- Send button --- */
+#sendBtn {
+    background: #1197fa;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 24px;
+    font-size: 13px;
+    font-weight: bold;
+}
+#sendBtn:hover {
+    background: #0e86e0;
+}
+#sendBtn:pressed {
+    background: #0b6fc0;
+}
+
+/* --- Message time label --- */
+#msgTimeLabel {
+    color: #b0b0b0;
+    font-size: 11px;
+}
+
+/* --- Contact list --- */
+#contactList {
+    background: #ffffff;
+    border: none;
+    outline: none;
+}
+#contactList::item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    min-height: 40px;
+}
+#contactList::item:hover {
+    background: #f5f5f5;
+}
+#contactList::item:selected {
+    background: #e3f0ff;
+    color: #1197fa;
+}
+
+/* --- Contact list title --- */
+#contactTitleLabel {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    padding: 10px;
+}
+
+/* --- Add friend button --- */
+#addFriendBtn {
+    background: #1197fa;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 13px;
+}
+#addFriendBtn:hover {
+    background: #0e86e0;
+}
+
+/* --- Emoji picker --- */
+#emojiPicker {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+/* --- Dialog styling --- */
+QDialog {
+    background: #ffffff;
+}
+QGroupBox {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-top: 10px;
+    padding-top: 16px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 6px;
+}
+
+/* --- CheckBox --- */
+QCheckBox {
+    spacing: 8px;
+    font-size: 13px;
+    color: #333;
+}
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #c0c0c0;
+    border-radius: 3px;
+    background: #fff;
+}
+QCheckBox::indicator:checked {
+    background: #1197fa;
+    border-color: #1197fa;
+}
