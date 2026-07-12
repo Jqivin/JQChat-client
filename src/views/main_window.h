@@ -32,6 +32,7 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
     bool eventFilter(QObject *obj, QEvent *event) override;
+    void changeEvent(QEvent *event) override;
 
 private slots:
     // 会话列表项被点击
@@ -84,6 +85,7 @@ private:
     TrayIcon *m_trayIcon;
     QPushButton *m_notifyBtn;
     int m_pendingCount = 0;
+    bool m_loggedIn = false;
 
     ApiManager *m_api;
     ChatViewModel *m_chatVM;

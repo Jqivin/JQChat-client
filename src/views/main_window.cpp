@@ -259,20 +259,25 @@ void MainWindow::setupUI() {
     resize(1000, 700);
     setMinimumSize(800, 600);
     setWindowTitle("JQChat");
+    setWindowIcon(QIcon(":/images/jqchat"));
 }
 
 // 创建系统托盘图标及右键菜单
 void MainWindow::setupTray() {
     m_trayIcon = new TrayIcon(this);
     connect(m_trayIcon, &TrayIcon::showWindow, this, [this]() {
-        show();
-        raise();
-        activateWindow();
+        if (m_loggedIn) {
+            show();
+            raise();
+            activateWindow();
+            m_trayIcon->stopBlink();
+        }
     });
 }
 
 // 登录后初始化：设置昵称、连接 WebSocket、加载会话和好友列表
 void MainWindow::initAfterLogin() {
+    m_loggedIn = true;
     m_chatVM->messageModel()->setSelfUid(m_api->selfInfo().user_id);
     m_selfName->setText(m_api->selfInfo().nickname);
     m_api->connectWebSocket();
@@ -374,6 +379,14 @@ void MainWindow::showNotification(const QString &title, const QString &content) 
     if (isMinimized() || !isVisible()) {
         m_trayIcon->showMessage(title, content);
     }
+}
+
+// 窗口激活时停止托盘闪烁
+void MainWindow::changeEvent(QEvent *event) {
+    if (event->type() == QEvent::ActivationChange && isActiveWindow()) {
+        m_trayIcon->stopBlink();
+    }
+    QMainWindow::changeEvent(event);
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {

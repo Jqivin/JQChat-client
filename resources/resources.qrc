@@ -4,4 +4,7 @@
         <file alias="login.qss">qss/login.qss</file>
         <file alias="main.qss">qss/main.qss</file>
     </qresource>
+    <qresource prefix="/images">
+        <file alias="jqchat">images/JQChat.png</file>
+    </qresource>
 </RCC>

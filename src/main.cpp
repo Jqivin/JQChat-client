@@ -19,6 +19,9 @@ int main(int argc, char *argv[]) {
     app.setApplicationName("JQChat");
     app.setApplicationVersion("1.0.0");
 
+    // 应用图标（任务栏、窗口左上角）
+    app.setWindowIcon(QIcon(":/images/jqchat"));
+
     AppConfig &config = AppConfig::instance();
 
     // 初始化日志：日志文件保存在 AppData/JQChat/logs/

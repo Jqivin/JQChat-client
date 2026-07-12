@@ -8,10 +8,7 @@ TrayIcon::TrayIcon(QObject *parent)
     , m_blinkTimer(new QTimer(this))
     , m_blinkState(true)
 {
-    // 使用纯色图标（暂缺图标文件）
-    QPixmap pixmap(16, 16);
-    pixmap.fill(QColor("#1197fa"));
-    QIcon icon(pixmap);
+    QIcon icon(":/images/jqchat");
 
     m_trayIcon = new QSystemTrayIcon(icon, qobject_cast<QWidget*>(parent));
 
