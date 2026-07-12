@@ -6,5 +6,8 @@
     </qresource>
     <qresource prefix="/images">
         <file alias="jqchat">images/JQChat.png</file>
+        <file alias="mini">images/mini.svg</file>
+        <file alias="max">images/max.svg</file>
+        <file alias="close">images/close.svg</file>
     </qresource>
 </RCC>

@@ -44,6 +44,7 @@ set(SOURCES
     src/widgets/popup_notify.cpp
     src/widgets/rounded_image.cpp
     src/widgets/crop_avatar_dialog.cpp
+    src/widgets/title_bar.cpp
     src/utils/config.cpp
     src/utils/image_utils.cpp
     src/utils/logger.cpp
@@ -79,6 +80,7 @@ set(HEADERS
     src/widgets/popup_notify.h
     src/widgets/rounded_image.h
     src/widgets/crop_avatar_dialog.h
+    src/widgets/title_bar.h
     src/utils/config.h
     src/utils/image_utils.h
     src/utils/logger.h

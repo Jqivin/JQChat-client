@@ -69,62 +69,41 @@ void ContactList::onFriendListUpdated() {
         auto *row = new QFrame;
         row->setStyleSheet("background: transparent;");
         auto *rowLayout = new QHBoxLayout(row);
-        rowLayout->setContentsMargins(12, 8, 12, 8);
-        rowLayout->setSpacing(12);
+        rowLayout->setContentsMargins(16, 10, 16, 10);
+        rowLayout->setSpacing(14);
+        rowLayout->setAlignment(Qt::AlignVCenter);
 
-        // 在线状态指示灯（小圆点）
-        auto *dot = new QLabel;
-        int dotSize = 12;
-        dot->setFixedSize(dotSize, dotSize);
-        QString dotBg = f.online ? "#07c160" : "#777777";
-        dot->setStyleSheet(QString(
-            "background: %1; border-radius: %2px; min-width: %2px; min-height: %2px;")
-            .arg(dotBg).arg(dotSize / 2));
-        rowLayout->addWidget(dot);
-
-        // 头像（圆形，首字母占位 → 异步加载真实头像）
+        // 头像（圆形）
         auto *avatar = new QLabel(f.nickname.left(1).toUpper());
-        avatar->setFixedSize(42, 42);
+        avatar->setFixedSize(44, 44);
         avatar->setAlignment(Qt::AlignCenter);
-        QString placeholderStyle = QString(
-            "background: %1; border-radius: 21px; color: white;"
-            " font-size: 16px; font-weight: bold;")
-            .arg(f.online ? "#07c160" : "#666666");
-        avatar->setStyleSheet(placeholderStyle);
+        QString avatarBg = f.online ? "#07c160" : "#555555";
+        avatar->setStyleSheet(QString(
+            "background: %1; border-radius: 22px; color: white;"
+            " font-size: 18px; font-weight: bold;").arg(avatarBg));
         rowLayout->addWidget(avatar);
 
         // 异步加载真实头像
         if (!f.avatar_url.isEmpty()) {
-            AvatarLoader::instance().load(f.avatar_url, [avatar, placeholderStyle](const QPixmap &pix) {
+            AvatarLoader::instance().load(f.avatar_url, [avatar](const QPixmap &pix) {
                 if (!pix.isNull()) {
-                    avatar->setPixmap(pix.scaled(42, 42, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-                    avatar->setStyleSheet("border-radius: 21px;");
+                    avatar->setPixmap(pix.scaled(44, 44, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    avatar->setStyleSheet("border-radius: 22px;");
                     avatar->setText("");
                 }
             });
         }
 
-        // 昵称 + 备注
-        auto *textLayout = new QVBoxLayout;
-        textLayout->setSpacing(2);
-
+        // 昵称
         auto *nameLabel = new QLabel(f.nickname);
-        nameLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold; background: transparent;");
-        textLayout->addWidget(nameLabel);
+        nameLabel->setStyleSheet("color: white; font-size: 15px; background: transparent;");
+        rowLayout->addWidget(nameLabel, 1);
 
-        if (!f.remark.isEmpty()) {
-            auto *remarkLabel = new QLabel(f.remark);
-            remarkLabel->setStyleSheet("color: #999; font-size: 12px; background: transparent;");
-            textLayout->addWidget(remarkLabel);
-        }
-
-        rowLayout->addLayout(textLayout, 1);
-
-        // 在线文字状态
-        auto *statusLabel = new QLabel(f.online ? "在线" : "离线");
+        // 在线状态（小文字）
+        auto *statusLabel = new QLabel(f.online ? "● 在线" : "● 离线");
         statusLabel->setStyleSheet(QString(
             "color: %1; font-size: 12px; background: transparent;")
-            .arg(f.online ? "#07c160" : "#999"));
+            .arg(f.online ? "#07c160" : "#888"));
         rowLayout->addWidget(statusLabel);
 
         // ---- 添加到列表 ----

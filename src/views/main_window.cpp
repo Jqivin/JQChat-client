@@ -6,6 +6,7 @@
 #include "widgets/tray_icon.h"
 #include "widgets/popup_notify.h"
 #include "widgets/crop_avatar_dialog.h"
+#include "widgets/title_bar.h"
 #include "network/api_manager.h"
 #include "viewmodels/chat_viewmodel.h"
 #include "viewmodels/contact_viewmodel.h"
@@ -35,6 +36,11 @@ MainWindow::MainWindow(QWidget *parent)
     , m_notifyBtn(nullptr)
     , m_pendingCount(0)
 {
+    // 无边框窗口
+    setWindowFlags(Qt::FramelessWindowHint);
+    // 保留窗口阴影（Windows）
+    setAttribute(Qt::WA_TranslucentBackground, false);
+
     setupUI();
     setupTray();
 
@@ -113,8 +119,17 @@ void MainWindow::setupUI() {
     m_mainWidget = new QWidget;
     setCentralWidget(m_mainWidget);
 
-    auto *mainLayout = new QHBoxLayout(m_mainWidget);
+    auto *outerLayout = new QVBoxLayout(m_mainWidget);
+    outerLayout->setContentsMargins(0, 0, 0, 0);
+    outerLayout->setSpacing(0);
+
+    // 自定义标题栏
+    auto *titleBar = new TitleBar(this);
+    outerLayout->addWidget(titleBar);
+
+    auto *mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(0, 0, 0, 0);
+    outerLayout->addLayout(mainLayout, 1);
 
     m_splitter = new QSplitter(Qt::Horizontal);
 
