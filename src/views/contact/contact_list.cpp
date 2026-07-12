@@ -2,6 +2,7 @@
 #include "add_friend_dialog.h"
 #include "viewmodels/contact_viewmodel.h"
 #include "models/friend_model.h"
+#include "utils/avatar_loader.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -81,15 +82,27 @@ void ContactList::onFriendListUpdated() {
             .arg(dotBg).arg(dotSize / 2));
         rowLayout->addWidget(dot);
 
-        // 头像（圆形，首字母）
+        // 头像（圆形，首字母占位 → 异步加载真实头像）
         auto *avatar = new QLabel(f.nickname.left(1).toUpper());
         avatar->setFixedSize(42, 42);
         avatar->setAlignment(Qt::AlignCenter);
-        avatar->setStyleSheet(QString(
+        QString placeholderStyle = QString(
             "background: %1; border-radius: 21px; color: white;"
             " font-size: 16px; font-weight: bold;")
-            .arg(f.online ? "#07c160" : "#666666"));
+            .arg(f.online ? "#07c160" : "#666666");
+        avatar->setStyleSheet(placeholderStyle);
         rowLayout->addWidget(avatar);
+
+        // 异步加载真实头像
+        if (!f.avatar_url.isEmpty()) {
+            AvatarLoader::instance().load(f.avatar_url, [avatar, placeholderStyle](const QPixmap &pix) {
+                if (!pix.isNull()) {
+                    avatar->setPixmap(pix.scaled(42, 42, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    avatar->setStyleSheet("border-radius: 21px;");
+                    avatar->setText("");
+                }
+            });
+        }
 
         // 昵称 + 备注
         auto *textLayout = new QVBoxLayout;

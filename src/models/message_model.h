@@ -22,6 +22,8 @@ public:
     void clearMessages(quint64 targetUid);
     // 更新消息发送状态
     void updateMessageStatus(const QString &msgId, int status);
+    // 更新消息的 file_url
+    void updateMessageUrl(const QString &msgId, const QString &url);
     // 获取指定会话的消息列表
     QList<MessageData> messages(quint64 targetUid) const;
 

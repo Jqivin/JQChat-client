@@ -1,11 +1,15 @@
 #include "message_item.h"
+#include "utils/avatar_loader.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPixmap>
 #include <QMovie>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QFile>
 
 // 构造函数：根据消息类型和是否自己发送来构建气泡布局
-MessageItem::MessageItem(const MessageData &msg, bool isSelf, QWidget *parent)
+MessageItem::MessageItem(const MessageData &msg, bool isSelf, const QString &avatarUrl, QWidget *parent)
     : QFrame(parent)
 {
     setObjectName("messageItem");
@@ -30,11 +34,21 @@ MessageItem::MessageItem(const MessageData &msg, bool isSelf, QWidget *parent)
         outerLayout->addStretch();
     } else {
         auto *avatar = makeAvatar();
-        avatar->setText("对");
+        avatar->setText("?");
         avatar->setStyleSheet(
             "background: #87ceeb; border-radius: 18px;"
             "font-size: 14px; font-weight: bold; color: #fff;"
             "min-width: 36px; min-height: 36px;");
+        // 异步加载头像
+        if (!avatarUrl.isEmpty()) {
+            AvatarLoader::instance().load(avatarUrl, [avatar](const QPixmap &pix) {
+                if (!pix.isNull()) {
+                    avatar->setPixmap(pix.scaled(36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    avatar->setStyleSheet("border-radius: 18px; min-width: 36px; min-height: 36px;");
+                    avatar->setText("");
+                }
+            });
+        }
         outerLayout->addWidget(avatar);
     }
 
@@ -76,6 +90,16 @@ MessageItem::MessageItem(const MessageData &msg, bool isSelf, QWidget *parent)
             "background: #1197fa; border-radius: 18px;"
             "font-size: 14px; font-weight: bold; color: #fff;"
             "min-width: 36px; min-height: 36px;");
+        // 异步加载头像
+        if (!avatarUrl.isEmpty()) {
+            AvatarLoader::instance().load(avatarUrl, [avatar](const QPixmap &pix) {
+                if (!pix.isNull()) {
+                    avatar->setPixmap(pix.scaled(36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                    avatar->setStyleSheet("border-radius: 18px; min-width: 36px; min-height: 36px;");
+                    avatar->setText("");
+                }
+            });
+        }
         outerLayout->addWidget(avatar);
     } else {
         outerLayout->addLayout(contentColumn);
@@ -93,22 +117,49 @@ void MessageItem::setupText(const MessageData &msg, bool isSelf) {
              isSelf ? "#000000" : "#333333"));
 }
 
-// 图片消息：加载缩略图显示，加载失败显示"[图片]"
+// 图片消息：加载缩略图显示（本地文件 / 服务器 URL），失败显示"[图片]"
 void MessageItem::setupImage(const MessageData &msg, bool isSelf) {
-    QPixmap pix(msg.file_url);
-    if (!pix.isNull()) {
-        pix = pix.scaled(240, 240, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        m_contentLabel->setPixmap(pix);
-        m_contentLabel->setStyleSheet(QString(
-            "QLabel { background: %1; padding: 4px; border-radius: 8px; }")
-            .arg(isSelf ? "#cce5ff" : "#ffffff"));
-    } else {
-        m_contentLabel->setText("[图片]");
-        m_contentLabel->setStyleSheet(QString(
-            "QLabel { background: %1; color: #666; padding: 10px 14px;"
-            " border-radius: 8px; font-size: 14px; }")
-            .arg(isSelf ? "#cce5ff" : "#ffffff"));
+    QString url = msg.file_url;
+
+    // 本地文件：直接加载
+    if (QFile::exists(url)) {
+        QPixmap pix(url);
+        if (!pix.isNull()) {
+            pix = pix.scaled(240, 240, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            m_contentLabel->setPixmap(pix);
+            m_contentLabel->setStyleSheet(QString(
+                "QLabel { background: %1; padding: 4px; border-radius: 8px; }")
+                .arg(isSelf ? "#cce5ff" : "#ffffff"));
+            return;
+        }
     }
+
+    // 远程 URL：通过 AvatarLoader 下载
+    if (!url.isEmpty()) {
+        AvatarLoader::instance().load(url, [this, isSelf](const QPixmap &pix) {
+            if (!pix.isNull()) {
+                QPixmap scaled = pix.scaled(240, 240, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                m_contentLabel->setPixmap(scaled);
+                m_contentLabel->setStyleSheet(QString(
+                    "QLabel { background: %1; padding: 4px; border-radius: 8px; }")
+                    .arg(isSelf ? "#cce5ff" : "#ffffff"));
+            } else {
+                m_contentLabel->setText("[图片]");
+                m_contentLabel->setStyleSheet(QString(
+                    "QLabel { background: %1; color: #666; padding: 10px 14px;"
+                    " border-radius: 8px; font-size: 14px; }")
+                    .arg(isSelf ? "#cce5ff" : "#ffffff"));
+            }
+        });
+        return;
+    }
+
+    // 无 URL：占位
+    m_contentLabel->setText("[图片]");
+    m_contentLabel->setStyleSheet(QString(
+        "QLabel { background: %1; color: #666; padding: 10px 14px;"
+        " border-radius: 8px; font-size: 14px; }")
+        .arg(isSelf ? "#cce5ff" : "#ffffff"));
 }
 
 // 表情消息：尝试加载表情图片，否则显示大号 Emoji 文字

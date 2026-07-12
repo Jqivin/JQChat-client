@@ -180,6 +180,22 @@ void ApiManager::uploadAvatar(const QString &filePath) {
     m_httpClient->uploadFile("/api/v1/user/avatar", filePath, "avatar");
 }
 
+// 上传聊天图片到服务器
+void ApiManager::uploadChatImage(const QString &filePath) {
+    connect(m_httpClient, &HttpClient::requestFinished, this, [this](int code, const QJsonObject &resp) {
+        Q_UNUSED(code)
+        handleResponse(resp,
+            [this](const QJsonObject &data) {
+                emit chatImageUploaded(data["file_url"].toString());
+            },
+            [this](int, const QString &msg) {
+                emit chatImageUploaded("");  // 空字符串表示失败
+            });
+    }, Qt::SingleShotConnection);
+
+    m_httpClient->uploadFile("/api/v1/user/avatar", filePath, "chat_image");
+}
+
 // 获取指定用户的详细信息
 void ApiManager::getUserInfo(quint64 uid) {
     QUrlQuery params;

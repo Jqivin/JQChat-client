@@ -5,6 +5,7 @@
 #include "viewmodels/chat_viewmodel.h"
 #include "models/message_model.h"
 #include "network/api_manager.h"
+#include "utils/avatar_loader.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -78,10 +79,17 @@ void ChatWindow::setTarget(quint64 uid, const QString &name) {
     clearMessages();
 }
 
+void ChatWindow::setUserAvatar(quint64 uid, const QString &url) {
+    m_avatars[uid] = url;
+}
+
 // 根据消息创建 MessageItem 并添加到消息区域
 void ChatWindow::addMessage(const MessageData &msg) {
     bool isSelf = msg.from_uid == ApiManager::instance()->selfInfo().user_id;
-    auto *item = new MessageItem(msg, isSelf);
+    quint64 avatarUid = isSelf ? msg.from_uid : msg.from_uid;
+    // 优先取消息发送者的头像
+    QString avatarUrl = m_avatars.value(msg.from_uid);
+    auto *item = new MessageItem(msg, isSelf, avatarUrl);
     m_messageLayout->addWidget(item);
     scrollToBottom();
 }

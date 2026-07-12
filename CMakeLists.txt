@@ -43,9 +43,11 @@ set(SOURCES
     src/widgets/tray_icon.cpp
     src/widgets/popup_notify.cpp
     src/widgets/rounded_image.cpp
+    src/widgets/crop_avatar_dialog.cpp
     src/utils/config.cpp
     src/utils/image_utils.cpp
     src/utils/logger.cpp
+    src/utils/avatar_loader.cpp
 )
 
 set(HEADERS
@@ -76,9 +78,11 @@ set(HEADERS
     src/widgets/tray_icon.h
     src/widgets/popup_notify.h
     src/widgets/rounded_image.h
+    src/widgets/crop_avatar_dialog.h
     src/utils/config.h
     src/utils/image_utils.h
     src/utils/logger.h
+    src/utils/avatar_loader.h
 )
 
 set(RESOURCES

@@ -37,25 +37,38 @@ void ChatViewModel::sendTextMessage(quint64 toUid, const QString &text) {
     m_api->wsClient()->sendMessage(toUid, MSG_TEXT, text, "");
 }
 
-// 创建本地消息对象并发送图片消息
+// 创建本地消息对象 → 上传到服务器 → 发送服务器 URL
 void ChatViewModel::sendImageMessage(quint64 toUid, const QString &filePath) {
     QFileInfo fi(filePath);
     if (!fi.exists()) return;
 
+    QString msgId = QString::number(QDateTime::currentMSecsSinceEpoch());
+
     MessageData localMsg;
-    localMsg.msg_id = QString::number(QDateTime::currentMSecsSinceEpoch());
+    localMsg.msg_id = msgId;
     localMsg.from_uid = m_api->selfInfo().user_id;
     localMsg.to_uid = toUid;
     localMsg.msg_type = MSG_IMAGE;
     localMsg.content = fi.fileName();
-    localMsg.file_url = filePath;     // 本地图片路径，用于发送方立即展示
+    localMsg.file_url = filePath;     // 本地路径，发送方立即展示
     localMsg.created_at = QDateTime::currentDateTime();
     localMsg.status = MSG_SENDING;
 
     m_msgModel->addMessage(localMsg);
     emit messageSent(localMsg);
 
-    m_api->wsClient()->sendMessage(toUid, MSG_IMAGE, fi.fileName(), filePath);
+    // 先上传到服务器，拿到 URL 后再发送消息
+    connect(m_api, &ApiManager::chatImageUploaded,
+            this, [this, toUid, msgId](const QString &fileUrl) {
+        if (!fileUrl.isEmpty()) {
+            // 更新本地消息的 file_url 为服务器 URL
+            m_msgModel->updateMessageUrl(msgId, fileUrl);
+            // 通过 WS 发送消息（用服务器 URL，对方能加载）
+            m_api->wsClient()->sendMessage(toUid, MSG_IMAGE, "", fileUrl);
+        }
+    }, Qt::SingleShotConnection);
+
+    m_api->uploadChatImage(filePath);
 }
 
 // 创建本地消息对象并发送表情消息

@@ -5,6 +5,7 @@
 #include "views/login/login_widget.h"
 #include "utils/config.h"
 #include "utils/logger.h"
+#include "utils/avatar_loader.h"
 #include "cache/database.h"
 #include <QApplication>
 #include <QStandardPaths>
@@ -23,6 +24,8 @@ int main(int argc, char *argv[]) {
     // 初始化日志：日志文件保存在 AppData/JQChat/logs/
     QString logDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs";
     Logger::instance().init(logDir);
+
+    AvatarLoader::instance().setBaseUrl(config.serverUrl());
 
     ApiManager *api = ApiManager::instance();
     api->setBaseUrl(config.serverUrl());

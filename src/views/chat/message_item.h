@@ -10,6 +10,7 @@ class MessageItem : public QFrame {
     Q_OBJECT
 public:
     explicit MessageItem(const MessageData &msg, bool isSelf,
+                         const QString &avatarUrl = "",
                          QWidget *parent = nullptr);
 
 private:

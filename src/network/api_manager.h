@@ -27,6 +27,7 @@ public:
     void loginByPassword(const QString &email, const QString &password);  // 密码登录
     void loginByVerifyCode(const QString &email, const QString &verifyCode);  // 验证码登录
     void uploadAvatar(const QString &filePath);  // 上传头像
+    void uploadChatImage(const QString &filePath);  // 上传聊天图片
     void getUserInfo(quint64 uid);  // 获取用户信息
 
     // ============ 好友接口 ============
@@ -56,6 +57,7 @@ signals:
     void loginResult(bool success, const QString &msg);
     void registerResult(bool success, const QString &msg);
     void userInfoReady(const UserInfo &info);
+    void chatImageUploaded(const QString &fileUrl);
 
     // Friends
     void friendSearched(bool found, const FriendInfo &info);

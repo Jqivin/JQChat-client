@@ -111,8 +111,12 @@ void HttpClient::uploadFile(const QString &path, const QString &filePath, const 
     multiPart->append(filePart);
     multiPart->append(typePart);
 
-    auto req = createRequest(path);
-    QNetworkReply *reply = m_manager->post(req, multiPart);
+    // 创建请求，但不设 Content-Type（Qt 自动设为 multipart/form-data）
+    QNetworkRequest request(QUrl(m_baseUrl + path));
+    if (!m_token.isEmpty()) {
+        request.setRawHeader("Authorization", ("Bearer " + m_token).toUtf8());
+    }
+    QNetworkReply *reply = m_manager->post(request, multiPart);
     multiPart->setParent(reply);
 
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {

@@ -5,11 +5,13 @@
 #include "setting/setting_dialog.h"
 #include "widgets/tray_icon.h"
 #include "widgets/popup_notify.h"
+#include "widgets/crop_avatar_dialog.h"
 #include "network/api_manager.h"
 #include "viewmodels/chat_viewmodel.h"
 #include "viewmodels/contact_viewmodel.h"
 #include "models/message_model.h"
 #include "models/friend_model.h"
+#include "utils/avatar_loader.h"
 #include "cache/database.h"
 
 #include <QVBoxLayout>
@@ -17,6 +19,9 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QApplication>
+#include <QMouseEvent>
+#include <QStandardPaths>
+#include <QFileDialog>
 
 // 构造函数：构建 UI、托盘图标，连接 WebSocket 状态信号和消息通知信号
 MainWindow::MainWindow(QWidget *parent)
@@ -88,6 +93,17 @@ MainWindow::MainWindow(QWidget *parent)
         raise();
         activateWindow();
     });
+
+    // 头像上传成功 → 刷新显示
+    connect(m_api, &ApiManager::userInfoReady,
+            this, [this](const UserInfo &info) {
+        AvatarLoader::instance().load(info.avatar_url, [this](const QPixmap &pix) {
+            if (!pix.isNull()) {
+                m_selfAvatar->setPixmap(pix.scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                m_selfAvatar->setStyleSheet("border-radius: 20px;");
+            }
+        });
+    });
 }
 
 MainWindow::~MainWindow() {}
@@ -116,6 +132,7 @@ void MainWindow::setupUI() {
     m_selfAvatar->setFixedSize(40, 40);
     m_selfAvatar->setStyleSheet("background: #07c160; border-radius: 20px;");
     m_selfAvatar->setCursor(Qt::PointingHandCursor);
+    m_selfAvatar->installEventFilter(this);
     selfInfoLayout->addWidget(m_selfAvatar);
 
     m_selfName = new QLabel;
@@ -259,6 +276,28 @@ void MainWindow::initAfterLogin() {
     m_chatVM->messageModel()->setSelfUid(m_api->selfInfo().user_id);
     m_selfName->setText(m_api->selfInfo().nickname);
     m_api->connectWebSocket();
+
+    // 设置自己头像（左上角 + 聊天消息）
+    const QString &selfAvatar = m_api->selfInfo().avatar_url;
+    m_chatWindow->setUserAvatar(m_api->selfInfo().user_id, selfAvatar);
+
+    if (!selfAvatar.isEmpty()) {
+        AvatarLoader::instance().load(selfAvatar, [this](const QPixmap &pix) {
+            if (!pix.isNull()) {
+                m_selfAvatar->setPixmap(pix.scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                m_selfAvatar->setStyleSheet("border-radius: 20px;");
+            }
+        });
+    }
+
+    // 好友列表加载完 → 设置好友头像
+    connect(m_contactVM, &ContactViewModel::friendListLoaded,
+            this, [this](bool) {
+        for (const auto &f : m_contactVM->friendModel()->friendList()) {
+            m_chatWindow->setUserAvatar(f.user_id, f.avatar_url);
+        }
+    });
+
     loadConversations();
     m_contactVM->loadFriendList();
 }
@@ -308,13 +347,25 @@ void MainWindow::onLogout() {
     QApplication::quit();
 }
 
-// 点击头像：弹出文件选择器上传新头像
+// 点击头像：选择图片 → 裁剪 → 上传
 void MainWindow::onAvatarClicked() {
-    QString path = QFileDialog::getOpenFileName(this, "选择头像",
-        QString(), "图片 (*.png *.jpg *.jpeg *.gif)");
-    if (!path.isEmpty()) {
-        m_api->uploadAvatar(path);
-    }
+    QString path = QFileDialog::getOpenFileName(this, "选择头像图片",
+        QString(), "图片 (*.png *.jpg *.jpeg *.gif *.bmp)");
+    if (path.isEmpty()) return;
+
+    // 打开裁剪弹窗
+    CropAvatarDialog dialog(path, this);
+    if (dialog.exec() != QDialog::Accepted) return;
+
+    // 保存裁剪结果到临时文件
+    QPixmap cropped = dialog.croppedPixmap();
+    if (cropped.isNull()) return;
+
+    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation)
+                       + "/jqchat_avatar.png";
+    cropped.save(tempPath, "PNG");
+
+    m_api->uploadAvatar(tempPath);
 }
 
 // 新消息通知：托盘闪烁 + 托盘气泡提示
@@ -323,6 +374,14 @@ void MainWindow::showNotification(const QString &title, const QString &content) 
     if (isMinimized() || !isVisible()) {
         m_trayIcon->showMessage(title, content);
     }
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == m_selfAvatar && event->type() == QEvent::MouseButtonPress) {
+        onAvatarClicked();
+        return true;
+    }
+    return QMainWindow::eventFilter(obj, event);
 }
 
 // 关闭事件：断开 WebSocket 并退出应用

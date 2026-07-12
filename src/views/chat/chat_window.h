@@ -5,6 +5,7 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QMap>
 #include "network/proto.h"
 
 class ChatViewModel;
@@ -24,6 +25,8 @@ public:
     void addMessage(const MessageData &msg);
     // 清空所有消息控件
     void clearMessages();
+    // 设置用户头像 URL（供 MainWindow 调用）
+    void setUserAvatar(quint64 uid, const QString &url);
 
 private slots:
     void onMessagesUpdated(quint64 targetUid);
@@ -44,6 +47,7 @@ private:
     QVBoxLayout *m_messageLayout;
     ChatInput *m_chatInput;
     EmojiPicker *m_emojiPicker;
+    QMap<quint64, QString> m_avatars;
 };
 
 #endif // CHAT_WINDOW_H

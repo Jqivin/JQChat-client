@@ -29,6 +29,19 @@ void MessageModel::clearMessages(quint64 targetUid) {
     emit messagesUpdated(targetUid);
 }
 
+// 更新消息的文件 URL（上传完成后）
+void MessageModel::updateMessageUrl(const QString &msgId, const QString &url) {
+    for (auto &list : m_messages) {
+        for (auto &msg : list) {
+            if (msg.msg_id == msgId) {
+                msg.file_url = url;
+                emit messagesUpdated(msg.to_uid);
+                return;
+            }
+        }
+    }
+}
+
 // 根据 msg_id 更新消息状态（发送中/已发送/已读）
 void MessageModel::updateMessageStatus(const QString &msgId, int status) {
     for (auto &list : m_messages) {
