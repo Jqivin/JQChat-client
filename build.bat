@@ -101,6 +101,8 @@ echo OutputBaseFilename=JQChat_Setup_v1.0.0
 echo Compression=lzma
 echo SolidCompression=yes
 echo UninstallDisplayName=JQChat
+echo SetupIconFile=%PROJECT_DIR%resources\images\JQChat.ico
+echo UninstallDisplayIcon={app}\JQChat.exe
 echo.
 echo [Files]
 echo Source: "%PACKAGE_DIR%\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs

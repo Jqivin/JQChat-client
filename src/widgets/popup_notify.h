@@ -16,6 +16,8 @@ public:
 
     // 显示通知（淡入动画，3秒后自动关闭）
     void showNotification(const QString &sender, const QString &preview);
+    // 显示带头像的通知
+    void showWithAvatar(const QString &sender, const QString &avatarUrl, const QString &preview);
     // 启用/禁用通知
     void setEnabled(bool enabled) { m_enabled = enabled; }
 
@@ -27,6 +29,8 @@ signals:
     void showWindow();
 
 private:
+    void showPopup();
+
     QLabel *m_avatar;
     QLabel *m_title;
     QLabel *m_content;

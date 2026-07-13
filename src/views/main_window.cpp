@@ -54,8 +54,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_chatVM->messageModel(), &MessageModel::newMessageReceived,
             this, [this](const MessageData &msg) {
         if (msg.from_uid != m_api->selfInfo().user_id) {
-            m_popupNotify->showNotification("新消息", msg.content);
-            showNotification("新消息", msg.content);
+            // 获取发送者头像
+            QString avatar = m_contactVM->friendModel()
+                ->findFriend(msg.from_uid).avatar_url;
+            QString senderName = m_contactVM->friendModel()
+                ->findFriend(msg.from_uid).nickname;
+            if (senderName.isEmpty()) senderName = QString("用户 %1").arg(msg.from_uid);
+
+            m_popupNotify->showWithAvatar(senderName, avatar, msg.content);
+            showNotification(senderName, "发来一条新消息");
         }
     });
 
@@ -95,9 +102,13 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(m_popupNotify, &PopupNotify::showWindow, this, [this]() {
-        show();
-        raise();
-        activateWindow();
+        if (m_loggedIn) {
+            if (isMinimized()) showNormal();
+            show();
+            raise();
+            activateWindow();
+            m_trayIcon->stopBlink();
+        }
     });
 
     // 头像上传成功 → 刷新显示
@@ -282,6 +293,7 @@ void MainWindow::setupTray() {
     m_trayIcon = new TrayIcon(this);
     connect(m_trayIcon, &TrayIcon::showWindow, this, [this]() {
         if (m_loggedIn) {
+            if (isMinimized()) showNormal();
             show();
             raise();
             activateWindow();
@@ -388,12 +400,11 @@ void MainWindow::onAvatarClicked() {
     m_api->uploadAvatar(tempPath);
 }
 
-// 新消息通知：托盘闪烁 + 托盘气泡提示
+// 新消息通知：托盘闪烁
 void MainWindow::showNotification(const QString &title, const QString &content) {
+    Q_UNUSED(title)
+    Q_UNUSED(content)
     m_trayIcon->startBlink();
-    if (isMinimized() || !isVisible()) {
-        m_trayIcon->showMessage(title, content);
-    }
 }
 
 // 窗口激活时停止托盘闪烁

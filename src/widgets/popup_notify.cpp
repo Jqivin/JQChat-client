@@ -1,4 +1,5 @@
 #include "popup_notify.h"
+#include "utils/avatar_loader.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGuiApplication>
@@ -40,13 +41,43 @@ PopupNotify::PopupNotify(QWidget *parent)
     connect(m_autoCloseTimer, &QTimer::timeout, this, &QWidget::hide);
 }
 
+// 显示通知（头像代替内容预览）
+void PopupNotify::showWithAvatar(const QString &sender, const QString &avatarUrl, const QString &preview) {
+    if (!m_enabled) return;
+    Q_UNUSED(preview)
+
+    m_title->setText(sender);
+    m_content->setText("发来一条新消息");
+
+    // 异步加载头像填充到左侧头像框
+    if (!avatarUrl.isEmpty()) {
+        AvatarLoader::instance().load(avatarUrl, [this](const QPixmap &pix) {
+            if (!pix.isNull()) {
+                QPixmap scaled = pix.scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                m_avatar->setPixmap(scaled);
+                m_avatar->setStyleSheet("border-radius: 20px;");
+            }
+        });
+    } else {
+        m_avatar->setText(sender.left(1).toUpper());
+        m_avatar->setStyleSheet("background: #07c160; border-radius: 20px; color: white;"
+                                " font-size: 16px; font-weight: bold;");
+        m_avatar->setAlignment(Qt::AlignCenter);
+    }
+
+    showPopup();
+}
+
 // 显示通知：定位到屏幕右下角，淡入动画，3秒后自动隐藏
 void PopupNotify::showNotification(const QString &sender, const QString &preview) {
     if (!m_enabled) return;
 
     m_title->setText(sender);
     m_content->setText(preview);
+    showPopup();
+}
 
+void PopupNotify::showPopup() {
     QRect screenRect = QGuiApplication::primaryScreen()->availableGeometry();
     move(screenRect.right() - width() - 10, screenRect.bottom() - height() - 50);
 
