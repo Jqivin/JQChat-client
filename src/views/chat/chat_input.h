@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QKeyEvent>
+#include <QEvent>
 
 // 聊天输入栏：文本输入 + 表情/图片按钮 + 发送按钮
 class ChatInput : public QWidget {
@@ -22,7 +23,7 @@ private slots:
     void onSendClicked();
 
 protected:
-    void keyPressEvent(QKeyEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
     QTextEdit *m_textEdit;

@@ -37,6 +37,7 @@ ChatInput::ChatInput(QWidget *parent)
     m_textEdit->setObjectName("messageTextEdit");
     m_textEdit->setPlaceholderText("输入消息...");
     m_textEdit->setFixedHeight(68);
+    m_textEdit->installEventFilter(this);   // 拦截 Enter 键
     layout->addWidget(m_textEdit);
 
     // 底部：发送按钮
@@ -71,11 +72,14 @@ void ChatInput::onSendClicked() {
     }
 }
 
-// 键盘事件：Enter 发送（Shift+Enter 换行）
-void ChatInput::keyPressEvent(QKeyEvent *e) {
-    if (e->key() == Qt::Key_Return && !(e->modifiers() & Qt::ShiftModifier)) {
-        onSendClicked();
-        return;
+// 事件过滤器：拦截 QTextEdit 的 Enter 键（发送消息），Shift+Enter 换行
+bool ChatInput::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == m_textEdit && event->type() == QEvent::KeyPress) {
+        auto *e = static_cast<QKeyEvent *>(event);
+        if (e->key() == Qt::Key_Return && !(e->modifiers() & Qt::ShiftModifier)) {
+            onSendClicked();
+            return true;
+        }
     }
-    QWidget::keyPressEvent(e);
+    return QWidget::eventFilter(obj, event);
 }

@@ -58,7 +58,6 @@ MessageItem::MessageItem(const MessageData &msg, bool isSelf, const QString &ava
 
     m_contentLabel = new QLabel;
     m_contentLabel->setWordWrap(true);
-    m_contentLabel->setMaximumWidth(380);
     m_contentLabel->setTextFormat(Qt::PlainText);
 
     if (msg.msg_type == MSG_TEXT) {
@@ -173,4 +172,10 @@ void MessageItem::setupEmoji(const MessageData &msg, bool isSelf) {
         m_contentLabel->setStyleSheet("font-size: 48px; background: transparent;");
     }
     m_contentLabel->setMaximumWidth(120);
+}
+
+void MessageItem::setMaxContentWidth(int w) {
+    if (w > 0) {
+        m_contentLabel->setMaximumWidth(w);
+    }
 }

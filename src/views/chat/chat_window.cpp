@@ -10,6 +10,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QScrollBar>
+#include <QResizeEvent>
+#include <QScrollBar>
 #include <QTimer>
 #include <QLabel>
 
@@ -40,6 +42,17 @@ ChatWindow::ChatWindow(ChatViewModel *viewModel, QWidget *parent)
     m_scrollArea->setObjectName("messageScrollArea");
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_scrollArea->setStyleSheet(
+        "QScrollArea { background: #f5f5f5; border: none; }"
+        "QScrollBar:vertical {"
+        "  background: #f5f5f5; width: 6px; margin: 0; }"
+        "QScrollBar::handle:vertical {"
+        "  background: #ccc; border-radius: 3px; min-height: 30px; }"
+        "QScrollBar::handle:vertical:hover { background: #aaa; }"
+        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
+        "  height: 0; border: none; }"
+        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+        "  background: none; }");
 
     m_messageContainer = new QWidget;
     m_messageContainer->setObjectName("messageContainer");
@@ -90,6 +103,8 @@ void ChatWindow::addMessage(const MessageData &msg) {
     // 优先取消息发送者的头像
     QString avatarUrl = m_avatars.value(msg.from_uid);
     auto *item = new MessageItem(msg, isSelf, avatarUrl);
+    int maxW = qMax(100, m_scrollArea->width() - 120);
+    item->setMaxContentWidth(maxW);
     m_messageLayout->addWidget(item);
     scrollToBottom();
 }
@@ -148,4 +163,20 @@ void ChatWindow::scrollToBottom() {
     QTimer::singleShot(50, this, [bar]() {
         bar->setValue(bar->maximum());
     });
+}
+
+void ChatWindow::resizeEvent(QResizeEvent *event) {
+    QWidget::resizeEvent(event);
+    updateMessageWidths();
+}
+
+void ChatWindow::updateMessageWidths() {
+    int maxW = qMax(100, m_scrollArea->width() - 120);
+    for (int i = 0; i < m_messageLayout->count(); ++i) {
+        auto *item = qobject_cast<MessageItem *>(
+            m_messageLayout->itemAt(i)->widget());
+        if (item) {
+            item->setMaxContentWidth(maxW);
+        }
+    }
 }

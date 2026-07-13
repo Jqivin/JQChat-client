@@ -13,6 +13,9 @@ public:
                          const QString &avatarUrl = "",
                          QWidget *parent = nullptr);
 
+    // 根据容器宽度动态设置内容最大宽度
+    void setMaxContentWidth(int w);
+
 private:
     // 设置文字气泡样式
     void setupText(const MessageData &msg, bool isSelf);

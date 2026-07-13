@@ -79,11 +79,11 @@ QMainWindow {
 #chatToolBtn {
     background: transparent;
     border: none;
-    font-size: 18px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    min-width: 32px;
-    min-height: 32px;
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    min-width: 20px;
+    min-height: 20px;
 }
 #chatToolBtn:hover {
     background: #e8e8e8;
@@ -99,8 +99,9 @@ QMainWindow {
     color: #333;
 }
 #messageTextEdit:focus {
-    border-color: #1197fa;
+    border: 1px solid #e0e0e0;
     background: #fff;
+    outline: none;
 }
 
 /* --- Send button --- */

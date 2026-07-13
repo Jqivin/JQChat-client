@@ -27,6 +27,10 @@ public:
     void clearMessages();
     // 设置用户头像 URL（供 MainWindow 调用）
     void setUserAvatar(quint64 uid, const QString &url);
+    void updateMessageWidths();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 
 private slots:
     void onMessagesUpdated(quint64 targetUid);
