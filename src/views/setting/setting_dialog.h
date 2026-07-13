@@ -19,6 +19,7 @@ private slots:
     void onNotifyToggled(bool checked);
     // 退出登录
     void onLogout();
+    void onClearCache();
 
 private:
     SettingViewModel *m_viewModel;

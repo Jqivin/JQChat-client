@@ -92,6 +92,12 @@ set(RESOURCES
     resources/resources.qrc
 )
 
+# Windows 任务栏图标（需要 .ico 文件）
+if(WIN32)
+    set(APP_ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/jqchat.rc")
+    list(APPEND SOURCES ${APP_ICON_RESOURCE})
+endif()
+
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES} ${HEADERS})

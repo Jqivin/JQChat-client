@@ -10,7 +10,6 @@
 #include "utils/credential_store.h"
 #include "cache/database.h"
 #include <QApplication>
-#include <QStandardPaths>
 
 // 程序入口：初始化配置、API管理器、本地数据库，显示登录窗口
 int main(int argc, char *argv[]) {
@@ -21,13 +20,14 @@ int main(int argc, char *argv[]) {
     app.setApplicationName("JQChat");
     app.setApplicationVersion("1.0.0");
 
-    // 应用图标（任务栏、窗口左上角）
+    // Windows 任务栏图标识别
     app.setWindowIcon(QIcon(":/images/jqchat"));
+    QGuiApplication::setApplicationDisplayName("JQChat");
 
     AppConfig &config = AppConfig::instance();
 
-    // 初始化日志：日志文件保存在 AppData/JQChat/logs/
-    QString logDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs";
+    // 初始化日志：日志文件保存在安装目录/logs/
+    QString logDir = QApplication::applicationDirPath() + "/logs";
     Logger::instance().init(logDir);
 
     AvatarLoader::instance().setBaseUrl(config.serverUrl());

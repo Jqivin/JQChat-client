@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QProcess>
+#include <QDir>
 
 // 构造函数：构建通知设置和账号管理分组
 SettingDialog::SettingDialog(QWidget *parent)
@@ -13,7 +14,7 @@ SettingDialog::SettingDialog(QWidget *parent)
     , m_viewModel(new SettingViewModel(this))
 {
     setWindowTitle("设置");
-    setFixedSize(380, 280);
+    setFixedSize(380, 330);
     setStyleSheet("QDialog { background: #fff; }");
 
     auto *layout = new QVBoxLayout(this);
@@ -52,12 +53,22 @@ SettingDialog::SettingDialog(QWidget *parent)
     m_logoutBtn->setCursor(Qt::PointingHandCursor);
     accountLayout->addWidget(m_logoutBtn);
 
+    auto *clearCacheBtn = new QPushButton("清理缓存");
+    clearCacheBtn->setStyleSheet(
+        "QPushButton { color: #666; background: #fff;"
+        "border: 1px solid #ccc; border-radius: 4px;"
+        "padding: 8px 16px; font-size: 13px; }"
+        "QPushButton:hover { background: #f5f5f5; }");
+    clearCacheBtn->setCursor(Qt::PointingHandCursor);
+    accountLayout->addWidget(clearCacheBtn);
+
     layout->addWidget(accountGroup);
     layout->addStretch();
 
     connect(m_popupNotifyCheck, &QCheckBox::toggled, this, &SettingDialog::onNotifyToggled);
     connect(m_soundCheck, &QCheckBox::toggled, m_viewModel, &SettingViewModel::setSoundEnabled);
     connect(m_logoutBtn, &QPushButton::clicked, this, &SettingDialog::onLogout);
+    connect(clearCacheBtn, &QPushButton::clicked, this, &SettingDialog::onClearCache);
 }
 
 // 通知开关变更：更新 ViewModel 设置
@@ -77,4 +88,17 @@ void SettingDialog::onLogout() {
         QProcess::startDetached(QApplication::applicationFilePath());
         QApplication::quit();
     }
+}
+
+void SettingDialog::onClearCache() {
+    QString logDir = QApplication::applicationDirPath() + "/logs";
+    QDir dir(logDir);
+    int count = 0;
+    if (dir.exists()) {
+        for (const auto &f : dir.entryList({"*.log"}, QDir::Files)) {
+            if (dir.remove(f)) count++;
+        }
+    }
+    QMessageBox::information(this, "清理缓存",
+        QString("已清理 %1 个日志文件").arg(count));
 }

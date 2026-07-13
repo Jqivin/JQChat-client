@@ -2,6 +2,7 @@
 #include "utils/logger.h"
 #include <QUrlQuery>
 #include <QJsonDocument>
+#include <QRegularExpression>
 #include <QFile>
 #include <QFileInfo>
 #include <QMimeDatabase>
@@ -44,10 +45,14 @@ void HttpClient::get(const QString &path, const QUrlQuery &params) {
     m_manager->get(req);
 }
 
+// 前置声明
+static QString maskSensitive(const QString &json);
+
 // POST 请求：将 JSON 对象序列化后发送
 void HttpClient::post(const QString &path, const QJsonObject &body) {
     QJsonDocument doc(body);
-    Logger::instance().httpRequest("POST", path, QString::fromUtf8(doc.toJson(QJsonDocument::Compact)));
+    Logger::instance().httpRequest("POST", path,
+        maskSensitive(QString::fromUtf8(doc.toJson(QJsonDocument::Compact))));
     auto req = createRequest(path);
     m_manager->post(req, doc.toJson());
 }
@@ -55,7 +60,8 @@ void HttpClient::post(const QString &path, const QJsonObject &body) {
 // PUT 请求
 void HttpClient::put(const QString &path, const QJsonObject &body) {
     QJsonDocument doc(body);
-    Logger::instance().httpRequest("PUT", path, QString::fromUtf8(doc.toJson(QJsonDocument::Compact)));
+    Logger::instance().httpRequest("PUT", path,
+        maskSensitive(QString::fromUtf8(doc.toJson(QJsonDocument::Compact))));
     auto req = createRequest(path);
     req.setRawHeader("Content-Type", "application/json");
     m_manager->put(req, doc.toJson());
@@ -124,6 +130,15 @@ void HttpClient::uploadFile(const QString &path, const QString &filePath, const 
     });
 }
 
+// 遮盖 JSON 中的敏感字段（密码等）
+static QString maskSensitive(const QString &json) {
+    QString result = json;
+    // 替换 "password":"xxx" 中的值为 ***
+    QRegularExpression re("\"(password|old_password|new_password)\"\\s*:\\s*\"[^\"]*\"");
+    result.replace(re, "\"\\1\":\"***\"");
+    return result;
+}
+
 // 响应处理：解析 JSON、提取状态码并发射信号
 // 网络错误和 HTTP 错误都通过 requestFinished 发射，保证调用方总能收到回调
 void HttpClient::onReplyFinished(QNetworkReply *reply) {
@@ -156,7 +171,7 @@ void HttpClient::onReplyFinished(QNetworkReply *reply) {
         return;
     }
 
-    QString respStr = QString::fromUtf8(data);
+    QString respStr = maskSensitive(QString::fromUtf8(data));
     Logger::instance().httpResponse(url, statusCode, respStr);
 
     QJsonDocument doc = QJsonDocument::fromJson(data);
