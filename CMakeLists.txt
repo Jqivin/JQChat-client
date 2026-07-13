@@ -49,6 +49,7 @@ set(SOURCES
     src/utils/image_utils.cpp
     src/utils/logger.cpp
     src/utils/avatar_loader.cpp
+    src/utils/credential_store.cpp
 )
 
 set(HEADERS

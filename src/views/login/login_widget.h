@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QLabel>
+#include <QCheckBox>
 #include <QTimer>
 #include <QPoint>
 
@@ -64,6 +65,7 @@ private:
     QWidget *m_loginPage;
     QLineEdit *m_loginEmail;
     QLineEdit *m_loginPassword;
+    QCheckBox *m_autoLoginCb;
     QPushButton *m_loginBtn;
     QPushButton *m_switchToCodeLogin;
     QPushButton *m_switchToRegister;

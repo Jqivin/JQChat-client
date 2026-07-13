@@ -1,5 +1,6 @@
 #include "login_widget.h"
 #include "viewmodels/login_viewmodel.h"
+#include "utils/credential_store.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QMouseEvent>
@@ -36,6 +37,14 @@ LoginWidget::LoginWidget(QWidget *parent)
     connect(m_viewModel, &LoginViewModel::registerResult,
             this, &LoginWidget::onRegisterResult);
     connect(m_countdownTimer, &QTimer::timeout, this, &LoginWidget::onCountdownTick);
+
+    // 加载已保存的凭证
+    auto cred = CredentialStore::load();
+    if (!cred.email.isEmpty()) {
+        m_loginEmail->setText(cred.email);
+        m_loginPassword->setText(cred.password);
+        m_autoLoginCb->setChecked(cred.autoLogin);
+    }
 }
 
 // 构建完整 UI：标题栏（最小化/关闭）+ 内容区（Logo + 三页表单）
@@ -145,6 +154,16 @@ void LoginWidget::setupUI() {
         " font-size: 15px; background: white; }"
         "QLineEdit:focus { border-color: #07c160; }");
     loginLayout->addWidget(m_loginPassword);
+
+    m_autoLoginCb = new QCheckBox("记住密码，自动登录");
+    m_autoLoginCb->setStyleSheet(
+        "QCheckBox { color: #666; font-size: 13px; spacing: 8px; }"
+        "QCheckBox::indicator { width: 16px; height: 16px; border: 1px solid #ccc;"
+        " border-radius: 3px; background: white; }"
+        "QCheckBox::indicator:checked {"
+        "  background: #07c160; border-color: #07c160;"
+        "  image: url(:/images/check.svg); }");
+    loginLayout->addWidget(m_autoLoginCb);
 
     m_loginBtn = new QPushButton("登  录");
     m_loginBtn->setFixedHeight(48);
@@ -442,6 +461,14 @@ void LoginWidget::onVerifyCodeResult(bool success, const QString &msg) {
 // 登录结果：成功则发射 loginSuccess 信号
 void LoginWidget::onLoginResult(bool success, const QString &msg) {
     if (success) {
+        // 保存自动登录凭证
+        if (m_autoLoginCb->isChecked()) {
+            CredentialStore::save(m_loginEmail->text().trimmed(),
+                                  m_loginPassword->text(), true);
+        } else {
+            CredentialStore::clear();
+        }
+
         m_statusLabel->setStyleSheet("color: #07c160; font-size: 12px; background: transparent;");
         m_statusLabel->setText("登录成功");
         emit loginSuccess();

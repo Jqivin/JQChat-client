@@ -9,5 +9,6 @@
         <file alias="mini">images/mini.svg</file>
         <file alias="max">images/max.svg</file>
         <file alias="close">images/close.svg</file>
+        <file alias="check">images/check.svg</file>
     </qresource>
 </RCC>

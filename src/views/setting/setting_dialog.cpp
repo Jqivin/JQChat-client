@@ -1,9 +1,11 @@
 #include "setting_dialog.h"
 #include "viewmodels/setting_viewmodel.h"
+#include "utils/credential_store.h"
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QMessageBox>
 #include <QApplication>
+#include <QProcess>
 
 // 构造函数：构建通知设置和账号管理分组
 SettingDialog::SettingDialog(QWidget *parent)
@@ -68,8 +70,11 @@ void SettingDialog::onLogout() {
     auto ret = QMessageBox::question(this, "退出登录",
         "确定要退出登录吗？", QMessageBox::Yes | QMessageBox::No);
     if (ret == QMessageBox::Yes) {
+        CredentialStore::clear();
         m_viewModel->clearLoginInfo();
         close();
+        // 重启应用
+        QProcess::startDetached(QApplication::applicationFilePath());
         QApplication::quit();
     }
 }

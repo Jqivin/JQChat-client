@@ -3,9 +3,11 @@
 #include "viewmodels/setting_viewmodel.h"
 #include "views/main_window.h"
 #include "views/login/login_widget.h"
+#include "viewmodels/login_viewmodel.h"
 #include "utils/config.h"
 #include "utils/logger.h"
 #include "utils/avatar_loader.h"
+#include "utils/credential_store.h"
 #include "cache/database.h"
 #include <QApplication>
 #include <QStandardPaths>
@@ -45,9 +47,31 @@ int main(int argc, char *argv[]) {
         mainWindow.show();
     });
 
-    loginWidget.show();
-    loginWidget.raise();
-    loginWidget.activateWindow();
+    // 自动登录：如果勾选了记住密码，后台直接调 API
+    auto cred = CredentialStore::load();
+    if (cred.autoLogin && !cred.email.isEmpty() && !cred.password.isEmpty()) {
+        // 直接登录（不显示登录窗口）
+        LoginViewModel tempVM;
+        QObject::connect(&tempVM, &LoginViewModel::loginResult,
+            [&](bool success, const QString &msg) {
+                if (success) {
+                    loginWidget.close();
+                    mainWindow.initAfterLogin();
+                    mainWindow.show();
+                } else {
+                    // 自动登录失败，显示登录窗口
+                    CredentialStore::clear();
+                    loginWidget.show();
+                    loginWidget.raise();
+                    loginWidget.activateWindow();
+                }
+            });
+        tempVM.loginByPassword(cred.email, cred.password);
+    } else {
+        loginWidget.show();
+        loginWidget.raise();
+        loginWidget.activateWindow();
+    }
 
     return app.exec();
 }
